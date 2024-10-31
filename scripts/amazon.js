@@ -16,7 +16,7 @@ products.forEach((product) => {
           <div class="product-rating-container">
             <img
               class="product-rating-stars"
-              src="images/ratings/rating-${product.rating.stars}.png"
+              src="images/ratings/rating-${product.rating.stars * 10}.png"
             />
             <div class="product-rating-count link-primary">${
               product.rating.count
@@ -44,12 +44,36 @@ products.forEach((product) => {
 
           <div class="product-spacer"></div>
 
-          <div class="added-to-cart">
+          <div class="added-to-cart js-added-to-cart">
             <img src="images/icons/checkmark.png" />
             Added
           </div>
 
-          <button class="add-to-cart-button button-primary">Add to Cart</button>
+          <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id= "${
+            product.id
+          }">Add to Cart</button>
         </div>
     `;
+});
+
+document.querySelectorAll(".js-add-to-cart").forEach((button) => {
+  let matchingItem;
+  button.addEventListener("click", () => {
+    cart.forEach((value) => {
+      if (button.dataset.productId === value.productId) {
+        matchingItem = value;
+      }
+    });
+
+    if (matchingItem) {
+      matchingItem.quantity++;
+    } else {
+      cart.push({
+        productId: button.dataset.productId,
+        quantity: 1,
+      });
+    }
+
+    console.log(cart);
+  });
 });
