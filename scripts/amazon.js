@@ -1,4 +1,4 @@
-import { cart } from "../data/cart.js";
+import { cart, addToCart } from "../data/cart.js";
 import { products } from "../data/products.js";
 
 let timeAdded = {};
@@ -61,53 +61,34 @@ products.forEach((product) => {
     `;
 });
 
+function updateCartQuantity() {
+  let sumQuantity = 0;
+
+  cart.forEach((obj) => {
+    sumQuantity += obj.quantity;
+  });
+
+  document.querySelector(".js-cart-quantity").innerHTML = sumQuantity;
+}
+
 document.querySelectorAll(".js-add-to-cart").forEach((button) => {
-  let matchingItem;
-
   button.addEventListener("click", () => {
-    cart.forEach((value) => {
-      if (button.dataset.productId === value.productId) {
-        matchingItem = value;
-      }
-    });
-
-    const addCart = document.querySelector(
-      `.js-added-to-cart-${button.dataset.productId}`
-    );
+    const productId = button.dataset.productId;
+    const addCart = document.querySelector(`.js-added-to-cart-${productId}`);
 
     if (!addCart.classList.contains("added-to-cart-opacity")) {
       addCart.classList.add("added-to-cart-opacity");
     }
 
-    clearTimeout(timeAdded[button.dataset.productId]);
-    timeAdded[button.dataset.productId] = setTimeout(() => {
+    clearTimeout(timeAdded[productId]);
+    timeAdded[productId] = setTimeout(() => {
       if (addCart.classList.contains("added-to-cart-opacity")) {
         addCart.classList.remove("added-to-cart-opacity");
       }
     }, 2000);
 
-    const quantitySelector = document.querySelector(
-      `.js-quantity-selector-${button.dataset.productId}`
-    ).value;
-
-    if (matchingItem) {
-      matchingItem.quantity += Number(quantitySelector);
-    } else {
-      cart.push({
-        productId: button.dataset.productId,
-        quantity: Number(quantitySelector),
-      });
-    }
-
-    let sumQuantity = 0;
-
-    cart.forEach((obj) => {
-      sumQuantity += obj.quantity;
-    });
-
-    document.querySelector(".js-cart-quantity").innerHTML = sumQuantity;
+    addToCart(productId);
+    updateCartQuantity();
     console.log(cart);
   });
 });
-
-function setTime() {}
