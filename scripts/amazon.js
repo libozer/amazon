@@ -61,13 +61,16 @@ products.forEach((product) => {
     `;
 });
 
+updateCartQuantity();
+
 function updateCartQuantity() {
   let sumQuantity = 0;
 
-  cart.forEach((obj) => {
-    sumQuantity += obj.quantity;
+  let quantityCart = JSON.parse(localStorage.getItem("carts"));
+  quantityCart.forEach((cart) => {
+    sumQuantity += Number(cart.quantity);
+    console.log(sumQuantity);
   });
-
   document.querySelector(".js-cart-quantity").innerHTML = sumQuantity;
 }
 
