@@ -11,7 +11,7 @@ cart.forEach((cartItem) => {
   });
   const container = document.querySelector(".order-summary");
   const innerHTML = `
- <div class="cart-item-container">
+ <div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
             <div class="delivery-date">Delivery date: Tuesday, June 21</div>
 
             <div class="cart-item-details-grid">
@@ -98,33 +98,49 @@ function updateCartQuantity() {
     sumQuantity += Number(cart.quantity);
   });
 
-  document.querySelector(".js-return-to-home-link").innerHTML = sumQuantity;
+  document.querySelector(
+    ".js-return-to-home-link"
+  ).innerHTML = `${sumQuantity} items`;
 }
 
 updateCartQuantity();
 
-document.querySelectorAll(".js-update-quantity-link").forEach((button) => {
-  button.addEventListener("click", () => {
-    const dataAtribute = button.dataset.productIdUpdate;
-    cart.forEach((item) => {
-      if (item.productId === dataAtribute) {
-        item.quantity++;
-      }
+// document.querySelectorAll(".js-update-quantity-link").forEach((button) => {
+//   button.addEventListener("click", () => {
+//     const dataAtribute = button.dataset.productIdUpdate;
 
-      localStorage.setItem("carts", JSON.stringify(cart));
-    });
-  });
-});
+//     cart.forEach((item) => {
+//       if (item.productId === dataAtribute) {
+//         item.quantity++;
+//       }
+
+//       localStorage.setItem("carts", JSON.stringify(cart));
+//     });
+//   });
+// });
 
 document.querySelectorAll(".js-delete-quantity-link").forEach((button) => {
   button.addEventListener("click", () => {
     const dataAtribute = button.dataset.productIdDelete;
-    cart.forEach((item) => {
+
+    cart.forEach((item, index) => {
       if (item.productId === dataAtribute) {
-        item.quantity--;
+        cart.splice(index, 1);
+
+        let removeElement = document.querySelector(
+          `.js-cart-item-container-${dataAtribute}`
+        );
+
+        removeElement.remove();
+        localStorage.setItem("carts", JSON.stringify(cart));
+
+        updateCartQuantity();
       }
     });
 
+    updateCartQuantity();
+
+    console.log(cart);
     localStorage.setItem("carts", JSON.stringify(cart));
   });
 });
