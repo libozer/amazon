@@ -4,11 +4,13 @@ import { products } from "../data/products.js";
 cart.forEach((cartItem) => {
   const productId = cartItem.productId;
   let matchingProduct;
+
   products.forEach((product) => {
     if (product.id === productId) {
       matchingProduct = product;
     }
   });
+
   const container = document.querySelector(".order-summary");
   const innerHTML = `
  <div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
@@ -31,11 +33,17 @@ cart.forEach((cartItem) => {
                   <span> Quantity: <span class="quantity-label">${
                     cartItem.quantity
                   }</span> </span>
-                  <span class="update-quantity-link link-primary js-update-quantity-link" data-product-id-update="${
+                  <span class="update-quantity-link link-primary js-update-quantity-link js-update-quantity-link-${
                     matchingProduct.id
-                  }">
+                  }" data-product-id-update="${matchingProduct.id}">
                     Update
                   </span>
+                  <input class="quantity-input quantity-input-none js-quantity-input-${
+                    matchingProduct.id
+                  }">
+                  <span class="save-quantity-link save-quantity-link-none link-primary js-save-quantity-link-${
+                    matchingProduct.id
+                  }">Save</span>
                   <span class="delete-quantity-link link-primary js-delete-quantity-link" data-product-id-delete="${
                     matchingProduct.id
                   }">
@@ -90,10 +98,32 @@ cart.forEach((cartItem) => {
   container.innerHTML += innerHTML;
 });
 
+function saveQuantity(inputElement, spanElement, update, item) {
+  let valueInput = Number(inputElement.value);
+  if (valueInput < 0 || valueInput > 1000 || isNaN(valueInput)) {
+    alert("Введите коректное значение");
+    return;
+  }
+  if (
+    !inputElement.classList.contains("quantity-input-none") &&
+    !spanElement.classList.contains("save-quantity-link-none")
+  ) {
+    update.classList.toggle("js-update-opacity");
+    inputElement.classList.add("quantity-input-none");
+    spanElement.classList.add("save-quantity-link-none");
+  }
+  item.quantity = valueInput;
+
+  let quantity = document.querySelector(".quantity-label");
+  quantity.innerHTML = valueInput;
+
+  localStorage.setItem("carts", JSON.stringify(cart));
+}
+
 function updateCartQuantity() {
   let sumQuantity = 0;
 
-  let quantityCart = JSON.parse(localStorage.getItem("carts"));
+  let quantityCart = JSON.parse(localStorage.getItem("carts")) || [];
   quantityCart.forEach((cart) => {
     sumQuantity += Number(cart.quantity);
   });
@@ -105,19 +135,54 @@ function updateCartQuantity() {
 
 updateCartQuantity();
 
-// document.querySelectorAll(".js-update-quantity-link").forEach((button) => {
-//   button.addEventListener("click", () => {
-//     const dataAtribute = button.dataset.productIdUpdate;
+document.querySelectorAll(".js-update-quantity-link").forEach((button) => {
+  button.addEventListener("click", () => {
+    const dataAtribute = button.dataset.productIdUpdate;
 
-//     cart.forEach((item) => {
-//       if (item.productId === dataAtribute) {
-//         item.quantity++;
-//       }
+    cart.forEach((item) => {
+      if (item.productId === dataAtribute) {
+        let inputElement = document.querySelector(
+          `.js-quantity-input-${dataAtribute}`
+        );
 
-//       localStorage.setItem("carts", JSON.stringify(cart));
-//     });
-//   });
-// });
+        let spanElement = document.querySelector(
+          `.js-save-quantity-link-${dataAtribute}`
+        );
+
+        let update = document.querySelector(
+          `.js-update-quantity-link-${dataAtribute}`
+        );
+
+        if (
+          inputElement.classList.contains("quantity-input-none") &&
+          spanElement.classList.contains("save-quantity-link-none")
+        ) {
+          update.classList.toggle("js-update-opacity");
+          inputElement.classList.remove("quantity-input-none");
+          spanElement.classList.remove("save-quantity-link-none");
+        }
+
+        spanElement.addEventListener(
+          "click",
+          () => {
+            saveQuantity(inputElement, spanElement, update, item);
+
+            updateCartQuantity();
+          },
+          { once: true }
+        );
+
+        inputElement.addEventListener("keyup", (event) => {
+          if (event.key === "Enter") {
+            saveQuantity(inputElement, spanElement, update, item);
+
+            updateCartQuantity();
+          }
+        });
+      }
+    });
+  });
+});
 
 document.querySelectorAll(".js-delete-quantity-link").forEach((button) => {
   button.addEventListener("click", () => {
@@ -137,8 +202,6 @@ document.querySelectorAll(".js-delete-quantity-link").forEach((button) => {
         updateCartQuantity();
       }
     });
-
-    updateCartQuantity();
 
     console.log(cart);
     localStorage.setItem("carts", JSON.stringify(cart));

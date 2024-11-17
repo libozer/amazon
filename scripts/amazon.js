@@ -66,11 +66,16 @@ updateCartQuantity();
 function updateCartQuantity() {
   let sumQuantity = 0;
 
-  let quantityCart = JSON.parse(localStorage.getItem("carts"));
+  let quantityCart = JSON.parse(localStorage.getItem("carts")) || [];
+
   quantityCart.forEach((cart) => {
     sumQuantity += Number(cart.quantity);
-    console.log(sumQuantity);
   });
+
+  if (!sumQuantity) {
+    sumQuantity = ``;
+  }
+
   document.querySelector(".js-cart-quantity").innerHTML = sumQuantity;
 }
 
